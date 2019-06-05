@@ -25,6 +25,11 @@ class DataBase:
     except:
       return ''
 
+  def getName(self, license_number):
+    try:
+      return self.dct[license_number]['name']
+    except:
+      return ''
 
 class Server:
   def __init__(self, ip, port, handler):
@@ -58,16 +63,19 @@ class CarInfoHandler:
         # validate that it is a licence number format.
         if not self.formatHandler.validate(data):
             phone_number = '-'
+            name = '-'
         elif not self.dataBase.isDisabledCar(data):
             phone_number = self.dataBase.getPhoneNumber(data)
+            name = self.dataBase.getName(data)
         else:
           result = 1
           phone_number = '-'
+          name = '-'
         #result_message = {
         #  "isDisabled":result,
         #  "phoneNumber":phone_number
         #}
-        result_message = str(result) + "," + str(phone_number)
+        result_message = str(result) + "," + str(phone_number) + "," + str(name)
         print(data, phone_number)
         s.send((str(result_message)+'\r\n').encode())
 
@@ -84,5 +92,5 @@ class LicenceFormatValidator:
   
 # main:
 db = DataBase('db.csv')
-server = Server('127.0.0.1', 5400, CarInfoHandler(db))
+server = Server('0.0.0.0', int(sys.argv[1]), CarInfoHandler(db))
 server.start()
